@@ -93,7 +93,9 @@ function M.start(dispatchers)
         })
       end
 
-      callback(nil, { completions = completions })
+      vim.schedule(function()
+        callback(nil, { completions = completions })
+      end)
     end)
   end
 
@@ -117,33 +119,35 @@ function M.start(dispatchers)
     end)
 
     deepseek_request(payload, function(err, result)
-      if err then
+      vim.schedule(function()
+        if err then
+          dispatchers.notification("PanelSolutionsDone", {
+            panelId = params.panelId,
+            status = "Error",
+            message = err,
+          })
+          return
+        end
+
+        for i, choice in ipairs(result.choices) do
+          dispatchers.notification("PanelSolution", {
+            panelId = params.panelId,
+            solutionId = "deepseek-panel-" .. (result.id or next_id()) .. "-" .. i,
+            displayText = choice.text,
+            completionText = choice.text,
+            range = {
+              start = params.doc.position,
+              ["end"] = params.doc.position,
+            },
+            score = 0,
+          })
+        end
+
         dispatchers.notification("PanelSolutionsDone", {
           panelId = params.panelId,
-          status = "Error",
-          message = err,
+          status = "OK",
         })
-        return
-      end
-
-      for i, choice in ipairs(result.choices) do
-        dispatchers.notification("PanelSolution", {
-          panelId = params.panelId,
-          solutionId = "deepseek-panel-" .. (result.id or next_id()) .. "-" .. i,
-          displayText = choice.text,
-          completionText = choice.text,
-          range = {
-            start = params.doc.position,
-            ["end"] = params.doc.position,
-          },
-          score = 0,
-        })
-      end
-
-      dispatchers.notification("PanelSolutionsDone", {
-        panelId = params.panelId,
-        status = "OK",
-      })
+      end)
     end)
   end
 
