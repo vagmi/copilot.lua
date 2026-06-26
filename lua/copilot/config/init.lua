@@ -5,6 +5,8 @@ local logger = require("copilot.logger")
 ---@field suggestion SuggestionConfig
 ---@field logger LoggerConfig
 ---@field server ServerConfig
+---@field backend "copilot"|"deepseek" Backend to use for Copilot
+---@field deepseek DeepSeekConfig
 ---@field nes NesConfig
 ---@field filetypes table<string, boolean> Filetypes to enable Copilot for
 ---@field auth_provider_url string|nil URL for the authentication provider
@@ -24,6 +26,8 @@ local M = {
   suggestion = require("copilot.config.suggestion").default,
   logger = require("copilot.config.logger").default,
   server = require("copilot.config.server").default,
+  backend = "copilot",
+  deepseek = require("copilot.config.deepseek").default,
   nes = require("copilot.config.nes").default,
   root_dir = require("copilot.config.root_dir").default,
   should_attach = require("copilot.config.should_attach").default,
@@ -61,6 +65,8 @@ function M.validate(config)
   vim.validate("nes", config.nes, "table")
   vim.validate("logger", config.logger, "table")
   vim.validate("server", config.server, "table")
+  vim.validate("backend", config.backend, "string")
+  vim.validate("deepseek", config.deepseek, "table")
   vim.validate("filetypes", config.filetypes, "table")
   vim.validate("auth_provider_url", config.auth_provider_url, { "string", "nil" })
   vim.validate("workspace_folders", config.workspace_folders, "table")
@@ -74,6 +80,7 @@ function M.validate(config)
   require("copilot.config.suggestion").validate(config.suggestion)
   require("copilot.config.logger").validate(config.logger)
   require("copilot.config.server").validate(config.server)
+  require("copilot.config.deepseek").validate(config.deepseek)
   require("copilot.config.root_dir").validate(config.root_dir)
   require("copilot.config.should_attach").validate(config.should_attach)
   require("copilot.config.nes").validate(config.nes)

@@ -3,6 +3,7 @@ local logger = require("copilot.logger")
 local M = {
   binary = require("copilot.lsp.binary"),
   nodejs = require("copilot.lsp.nodejs"),
+  deepseek = require("copilot.lsp.deepseek"),
   ---@type ServerConfig
   config = nil,
 }
@@ -13,6 +14,8 @@ function M.initialization_failed()
     return M.nodejs.initialization_failed
   elseif M.config.type == "binary" then
     return M.binary.initialization_failed
+  elseif M.config.type == "deepseek" then
+    return M.deepseek.initialization_failed
   end
 
   return true
@@ -24,6 +27,8 @@ function M.init()
     return M.nodejs.init()
   elseif M.config.type == "binary" then
     return M.binary.init()
+  elseif M.config.type == "deepseek" then
+    return M.deepseek.init()
   end
 
   return false
@@ -36,6 +41,8 @@ function M.get_server_info(client)
     return M.nodejs.get_server_info(client)
   elseif M.config.type == "binary" then
     return M.binary.get_server_info(client)
+  elseif M.config.type == "deepseek" then
+    return M.deepseek.get_server_info(client)
   end
 
   return ""
@@ -47,6 +54,8 @@ function M.get_execute_command()
     return M.nodejs.get_execute_command()
   elseif M.config.type == "binary" then
     return M.binary.get_execute_command()
+  elseif M.config.type == "deepseek" then
+    return M.deepseek.get_execute_command()
   end
 
   return {}
@@ -66,6 +75,8 @@ function M.setup(server_config, copilot_node_command)
     result = M.nodejs.setup(copilot_node_command, server_config.custom_server_filepath)
   elseif server_config.type == "binary" then
     M.binary.setup(server_config.custom_server_filepath)
+  elseif server_config.type == "deepseek" then
+    M.deepseek.setup()
   else
     logger.error("invalid server_config.type")
     result = false

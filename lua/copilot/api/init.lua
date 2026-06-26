@@ -16,8 +16,8 @@ function M.request(client, method, params, callback)
   -- empty table is convert to json array by default.
   params._ = true
 
-  local bufnr = params.bufnr
-  params.bufnr = nil
+  local bufnr = params.bufnr or 0
+  -- params.bufnr = nil
 
   if callback then
     return client:request(method, params, callback, bufnr)

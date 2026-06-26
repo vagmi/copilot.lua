@@ -207,6 +207,10 @@ end
 function M.setup()
   logger.trace("setting up client")
   local node_command = config.copilot_node_command
+  if config.backend == "deepseek" then
+    config.server.type = "deepseek"
+  end
+
   if not lsp.setup(config.server, node_command) then
     is_disabled = true
     return

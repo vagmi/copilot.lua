@@ -1,4 +1,4 @@
----@alias ServerType string<'nodejs', 'binary'>
+---@alias ServerType string<'nodejs', 'binary', 'deepseek'>
 
 ---@class (exact) ServerConfig
 ---@field type ServerType Type of the server
@@ -16,8 +16,8 @@ local server = {
 ---@param config ServerConfig
 function server.validate(config)
   vim.validate("type", config.type, function(server_type)
-    return type(server_type) == "string" and (server_type == "nodejs" or server_type == "binary")
-  end, false, "nodejs or binary")
+    return type(server_type) == "string" and (server_type == "nodejs" or server_type == "binary" or server_type == "deepseek")
+  end, false, "nodejs, binary or deepseek")
   vim.validate("custom_server_filepath", config.custom_server_filepath, { "string", "nil" })
 
   if config.custom_server_filepath then

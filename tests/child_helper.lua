@@ -61,7 +61,11 @@ function M.new_child_neovim(test_name)
 
   ---@param mock_lsp_server? boolean
   function child.run_pre_case(mock_lsp_server)
-    M.mock_lsp_server = mock_lsp_server or true
+    if mock_lsp_server == nil then
+      M.mock_lsp_server = true
+    else
+      M.mock_lsp_server = mock_lsp_server
+    end
     child.reset_config()
     child.restart({ "-u", "tests/scripts/minimal_init.lua" })
 

@@ -201,4 +201,66 @@ function M.get_node_args(server_path, server_type, node_version)
   return args
 end
 
+---@param current_bufnr integer
+---@param max_extra_chars integer
+---@return string
+function M.get_related_files_context(current_bufnr, max_extra_chars)
+  local context = {}
+  local total_chars = 0
+  local bufs = vim.api.nvim_list_bufs()
+  local current_ft = vim.bo[current_bufnr].filetype
+
+  for _, bufnr in ipairs(bufs) do
+    if bufnr ~= current_bufnr and vim.api.nvim_buf_is_valid(bufnr) and vim.api.nvim_buf_is_loaded(bufnr) then
+      local ft = vim.bo[bufnr].filetype
+      if ft == current_ft and ft ~= "" then
+        local lines = vim.api.nvim_buf_get_lines(bufnr, 0, 100, false) -- Limit to first 100 lines for now
+        if #lines > 0 then
+          local path = vim.api.nvim_buf_get_name(bufnr)
+          local filename = vim.fn.fnamemodify(path, ":t")
+          local content = table.concat(lines, "\n")
+          local header = string.format("\n-- File: %s\n", filename)
+          
+          if total_chars + #header + #content <= max_extra_chars then
+            table.insert(context, header .. content)
+            total_chars = total_chars + #header + #content
+          else
+            local remaining = max_extra_chars - total_chars - #header
+            if remaining > 100 then
+              table.insert(context, header .. content:sub(1, remaining))
+            end
+            break
+          end
+        end
+      end
+    end
+  end
+  return table.concat(context, "\n")
+end
+
+---@param bufnr integer
+---@param position { line: integer, character: integer }
+---@return string prefix
+---@return string suffix
+function M.get_fim_context(bufnr, position)
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+  local prefix_lines = {}
+  for i = 1, position.line do
+    table.insert(prefix_lines, lines[i])
+  end
+  local current_line = lines[position.line + 1] or ""
+  table.insert(prefix_lines, current_line:sub(1, position.character))
+  local prefix = table.concat(prefix_lines, "\n")
+
+  local suffix_lines = {}
+  table.insert(suffix_lines, current_line:sub(position.character + 1))
+  for i = position.line + 2, #lines do
+    table.insert(suffix_lines, lines[i])
+  end
+  local suffix = table.concat(suffix_lines, "\n")
+
+  -- DeepSeek suggests around 2048 characters for FIM context.
+  return prefix:sub(-2048), suffix:sub(1, 2048)
+end
+
 return M

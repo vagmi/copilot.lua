@@ -32,6 +32,7 @@ As lua is far more efficient and makes things easier to integrate with modern pl
   - [root_dir](#root_dir)
   - [should_attach](#should_attach)
   - [server](#server)
+  - [backend](#backend)
 - [Commands](#commands)
 - [Integrations](#integrations)
 - [FAQ](#faq)
@@ -214,6 +215,12 @@ require('copilot').setup({
   server = {
     type = "nodejs", -- "nodejs" | "binary"
     custom_server_filepath = nil,
+  },
+  backend = "copilot", -- "copilot" | "deepseek"
+  deepseek = {
+    api_key = nil, -- Supports string or environment variable DEEPSEEK_API_KEY
+    endpoint = "https://api.deepseek.com/beta/completions",
+    model = "deepseek-v4-flash",
   },
   server_opts_overrides = {},
 })
@@ -527,6 +534,21 @@ require("copilot").setup {
   server = {
     type = "nodejs",
     custom_server_filepath = "/home/user/copilot-lsp/language-server.js",
+  },
+}
+```
+
+### backend
+
+`copilot.lua` supports using [DeepSeek](https://www.deepseek.com/) as an alternative backend for completions. This uses DeepSeek's FIM (Fill-In-the-Middle) API.
+
+Example:
+
+```lua
+require("copilot").setup {
+  backend = "deepseek",
+  deepseek = {
+    api_key = vim.fn.getenv("DEEPSEEK_API_KEY"), -- or leave nil to use env var directly
   },
 }
 ```
