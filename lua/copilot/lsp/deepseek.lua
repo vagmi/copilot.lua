@@ -93,6 +93,7 @@ function M.start(dispatchers)
         })
       end
 
+      logger.debug("DeepSeek completions received:", completions)
       vim.schedule(function()
         callback(nil, { completions = completions })
       end)
@@ -104,14 +105,14 @@ function M.start(dispatchers)
     local prefix, suffix = util.get_fim_context(bufnr, params.doc.position)
     local extra_context = util.get_related_files_context(bufnr, 1024)
 
-    local solutionCountTarget = 10 -- TODO: configurable
+    local solutionCountTarget = 1
     local payload = {
       model = config.deepseek.model,
       prompt = extra_context .. "\n" .. prefix,
       suffix = suffix,
       max_tokens = 1024,
       temperature = 0.7,
-      n = solutionCountTarget,
+      n = 1,
     }
 
     vim.schedule(function()
@@ -128,6 +129,8 @@ function M.start(dispatchers)
           })
           return
         end
+
+        logger.debug("DeepSeek panel solutions received:", result.choices)
 
         for i, choice in ipairs(result.choices) do
           dispatchers.notification("PanelSolution", {
